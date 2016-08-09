@@ -731,7 +731,7 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 				step: 1,
 				precision: 0,
 				orientation: 'horizontal',
-				value: 5,
+				value: null,
 				range: false,
 				selection: 'before',
 				tooltip: 'show',
@@ -762,7 +762,7 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 			},
 
 			getValue: function getValue() {
-				if (this.options.range) {
+				if (this.options.range || this._state.value === null) {
 					return this._state.value;
 				} else {
 					return this._state.value[0];
@@ -771,7 +771,7 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 
 			setValue: function setValue(val, triggerSlideEvent, triggerChangeEvent) {
 				if (!val) {
-					val = 0;
+					val = null;
 				}
 				var oldValue = this.getValue();
 				this._state.value = this._validateInputValue(val);
@@ -1295,7 +1295,10 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 						dir = -dir;
 					}
 				}
-
+				if (this._state.value === null) {
+					this._state.value[0] = this._state.min;
+					this._state.value[1] = this._state.max;
+				}
 				var val = this._state.value[handleIdx] + dir * this.options.step;
 				if (this.options.range) {
 					val = [!handleIdx ? val : this._state.value[0], handleIdx ? val : this._state.value[1]];
@@ -1443,6 +1446,9 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 				return Math.max(0, (match[1] ? match[1].length : 0) - (match[2] ? +match[2] : 0));
 			},
 			_applyToFixedAndParseFloat: function _applyToFixedAndParseFloat(num, toFixedInput) {
+				if (num === null) {
+					return null;
+				}
 				var truncatedNum = num.toFixed(toFixedInput);
 				return parseFloat(truncatedNum);
 			},
@@ -1476,6 +1482,8 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 				} else if (Array.isArray(val)) {
 					this._validateArray(val);
 					return val;
+				} else if (val === null) {
+					return null;
 				} else {
 					throw new Error(ErrorMsgs.formatInvalidInputErrorMsg(val));
 				}
@@ -1483,7 +1491,7 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 			_validateArray: function _validateArray(val) {
 				for (var i = 0; i < val.length; i++) {
 					var input = val[i];
-					if (typeof input !== 'number') {
+					if (typeof input !== 'number' && input !== null) {
 						throw new Error(ErrorMsgs.formatInvalidInputErrorMsg(input));
 					}
 				}
